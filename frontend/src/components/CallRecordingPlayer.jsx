@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Play, Pause, Volume2, FastForward } from 'lucide-react';
+import { getBackendUrl } from '../services/api';
 
 export default function CallRecordingPlayer({ audioUrl }) {
   const audioRef = useRef(null);
@@ -9,7 +10,7 @@ export default function CallRecordingPlayer({ audioUrl }) {
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [volume, setVolume] = useState(0.8);
 
-  const fullUrl = audioUrl.startsWith('http') ? audioUrl : `http://localhost:5000${audioUrl}`;
+  const fullUrl = getBackendUrl(audioUrl);
 
   // Reset player when URL changes
   useEffect(() => {

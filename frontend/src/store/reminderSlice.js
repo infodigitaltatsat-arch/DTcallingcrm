@@ -1,12 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { api } from '../services/api';
 import { getErrorMessage } from '../utils/errorMessage';
 
 const API_URL = '/api/reminders';
 
 export const fetchReminders = createAsyncThunk('reminders/fetchReminders', async (_, { rejectWithValue }) => {
   try {
-    const response = await axios.get(API_URL);
+    const response = await api.get(API_URL);
     return response.data;
   } catch (error) {
     return rejectWithValue(getErrorMessage(error, 'Failed to fetch reminders'));
@@ -15,7 +15,7 @@ export const fetchReminders = createAsyncThunk('reminders/fetchReminders', async
 
 export const addReminder = createAsyncThunk('reminders/addReminder', async (reminderData, { rejectWithValue }) => {
   try {
-    const response = await axios.post(API_URL, reminderData);
+    const response = await api.post(API_URL, reminderData);
     return response.data;
   } catch (error) {
     return rejectWithValue(getErrorMessage(error, 'Failed to add reminder'));
@@ -24,7 +24,7 @@ export const addReminder = createAsyncThunk('reminders/addReminder', async (remi
 
 export const completeReminder = createAsyncThunk('reminders/completeReminder', async (id, { rejectWithValue }) => {
   try {
-    const response = await axios.put(`${API_URL}/${id}/complete`);
+    const response = await api.put(`${API_URL}/${id}/complete`);
     return response.data;
   } catch (error) {
     return rejectWithValue(getErrorMessage(error, 'Failed to complete reminder'));
@@ -33,7 +33,7 @@ export const completeReminder = createAsyncThunk('reminders/completeReminder', a
 
 export const deleteReminder = createAsyncThunk('reminders/deleteReminder', async (id, { rejectWithValue }) => {
   try {
-    await axios.delete(`${API_URL}/${id}`);
+    await api.delete(`${API_URL}/${id}`);
     return id;
   } catch (error) {
     return rejectWithValue(getErrorMessage(error, 'Failed to delete reminder'));

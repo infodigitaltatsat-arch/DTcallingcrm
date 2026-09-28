@@ -14,11 +14,23 @@ const authRoutes = require('./routes/authRoutes');
 const app = express();
 const server = http.createServer(app);
 
-// CORS configuration
-app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:5173",
+const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+const corsOptions = {
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error('Origin is not allowed by CORS'));
+  },
   credentials: true
-}));
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 app.use(express.json());
 
@@ -35,6 +47,9 @@ app.use('/api/reminders', reminderRoutes);
 app.get('/', (req, res) => {
   res.json({ message: 'Calling CRM API is active' });
 });
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
 
 // Configure Socket.io
 const io = initSocket(server);
@@ -44,6 +59,21 @@ const PORT = process.env.PORT || 5000;
 
 async function startServer() {
   try {
+    if (process.env.NODE_ENV === 'production') {
+      for (const key of ['MONGODB_URI', 'JWT_SECRET', 'ADMIN_AUDIT_PASSWORD', 'FRONTEND_URL']) {
+        if (!process.env[key]) {
+          throw new Error(`${key} must be configured in production`);
+        }
+      }
+      if (process.env.JWT_SECRET.length < 32) {
+        throw new Error('JWT_SECRET must contain at least 32 characters in production');
+      }
+      const databaseHost = new URL(process.env.MONGODB_URI).hostname;
+      if (['localhost', '127.0.0.1', '::1'].includes(databaseHost)) {
+        throw new Error('MONGODB_URI must use a remotely reachable database in production');
+      }
+    }
+
     await connectToMongoDB();
     server.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);

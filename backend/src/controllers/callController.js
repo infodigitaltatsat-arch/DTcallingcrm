@@ -39,7 +39,7 @@ exports.getCallLogById = async (req, res) => {
 };
 
 exports.createCallLog = async (req, res) => {
-  const { contactId, contactName, contactPhone, direction, status, duration, notes, recordingUrl, userId, userName } = req.body;
+  const { contactId, contactName, contactPhone, direction, status, duration, notes, recordingUrl } = req.body;
   
   if (!contactName || !contactPhone || !direction || !status) {
     return res.status(400).json({ error: 'Missing required call parameters' });
@@ -56,15 +56,15 @@ exports.createCallLog = async (req, res) => {
       duration: parseInt(duration, 10) || 0,
       notes: notes || '',
       recordingUrl: recordingUrl || null,
-      userId: userId || null,
-      userName: userName || null,
+      userId: req.user.id,
+      userName: req.user.username,
       createdAt: new Date()
     };
     await (await getCollection('callLogs')).insertOne(callLog);
 
-    if (userId) {
+    if (req.user.id) {
       await getCollection('users')
-        .then((users) => users.updateOne({ _id: userId }, { $set: { lastCallAt: new Date() } }))
+        .then((users) => users.updateOne({ _id: req.user.id }, { $set: { lastCallAt: new Date() } }))
         .catch(() => null);
     }
 

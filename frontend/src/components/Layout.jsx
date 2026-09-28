@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { io } from 'socket.io-client';
-import axios from 'axios';
+import { API_BASE_URL, api } from '../services/api';
 import { 
   Phone, 
   PhoneOff, 
@@ -69,7 +69,14 @@ export default function Layout({ children, activeTab, setActiveTab, onAdminAcces
 
   // Connect sockets
   useEffect(() => {
-    const socket = io();
+    if (!API_BASE_URL) {
+      console.error('VITE_API_URL must point to the deployed backend service.');
+      return undefined;
+    }
+
+    const socket = io(API_BASE_URL, {
+      auth: { token: localStorage.getItem('token') }
+    });
     socketInstance = socket;
 
     socket.on('connect', () => {
@@ -134,7 +141,7 @@ export default function Layout({ children, activeTab, setActiveTab, onAdminAcces
           duration: 0,
           notes: ''
         };
-        axios.post('/api/calls', payload).catch(err => console.error('Error saving missed call log:', err));
+        api.post('/api/calls', payload).catch(err => console.error('Error saving missed call log:', err));
         dispatch(declineInboundCall());
       }, 30000);
       return () => clearTimeout(timer);
@@ -225,7 +232,7 @@ export default function Layout({ children, activeTab, setActiveTab, onAdminAcces
       };
 
       try {
-        await axios.post('/api/calls', payload);
+        await api.post('/api/calls', payload);
       } catch (err) {
         console.error('Error saving missed call log:', err);
       }
@@ -260,14 +267,14 @@ export default function Layout({ children, activeTab, setActiveTab, onAdminAcces
     };
 
     try {
-      const response = await axios.post('/api/calls', payload);
+      const response = await api.post('/api/calls', payload);
       const newLog = response.data;
       dispatch(markCallActivity());
 
       if (finalBlob) {
         const formData = new FormData();
         formData.append('audio', finalBlob, `call-recording-${newLog.id}.wav`);
-        await axios.post(`/api/calls/${newLog.id}/recording`, formData, {
+        await api.post(`/api/calls/${newLog.id}/recording`, formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
       }

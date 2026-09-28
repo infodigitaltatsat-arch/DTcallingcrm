@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: calling-crm-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: MONGODB_DB_NAME
+        value: calling_crm
+      - key: JWT_SECRET
+        sync: false
+      - key: ADMIN_AUDIT_PASSWORD
+        sync: false
+      - key: INITIAL_ADMIN_USERNAME
+        sync: false
+      - key: INITIAL_ADMIN_PASSWORD
+        sync: false
+      - key: FRONTEND_URL
+        value: https://d-tcallingcrm.vercel.app

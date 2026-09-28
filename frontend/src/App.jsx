@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import { api } from './services/api';
 import { Lock, X } from 'lucide-react';
 import { Provider } from 'react-redux';
 import { store } from './store';
@@ -12,24 +12,68 @@ import { useDispatch, useSelector } from 'react-redux';
 import { logout } from './store/authSlice';
 import { getErrorMessage } from './utils/errorMessage';
 
+const TAB_PATHS = {
+  dashboard: '/dashboard',
+  logs: '/call-logs',
+  contacts: '/contacts',
+  admin: '/admin',
+  users: '/users'
+};
+
+function getTabFromPath(pathname) {
+  if (pathname === '/' || pathname === '/login') return 'dashboard';
+  return Object.keys(TAB_PATHS).find(tab => TAB_PATHS[tab] === pathname) || 'dashboard';
+}
+
 function AppContent() {
   const dispatch = useDispatch();
   const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
   const currentUser = useSelector(state => state.auth.user);
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTabState] = useState(() => getTabFromPath(window.location.pathname));
   const [showAdminPrompt, setShowAdminPrompt] = useState(false);
+  const [adminAuditAuthorized, setAdminAuditAuthorized] = useState(false);
   const [adminPassword, setAdminPassword] = useState('');
   const [adminError, setAdminError] = useState('');
   const [checkingAdmin, setCheckingAdmin] = useState(false);
   const [changingAdminPassword, setChangingAdminPassword] = useState(false);
   const [newAdminPassword, setNewAdminPassword] = useState('');
 
+  const setActiveTab = (tab) => {
+    setActiveTabState(tab);
+    const path = TAB_PATHS[tab] || TAB_PATHS.dashboard;
+    if (window.location.pathname !== path) {
+      window.history.pushState(null, '', path);
+    }
+  };
+
+  useEffect(() => {
+    const handlePopState = () => setActiveTabState(getTabFromPath(window.location.pathname));
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated || currentUser?.role === 'admin' || adminAuditAuthorized || activeTab !== 'admin') return;
+
+    setActiveTabState('dashboard');
+    window.history.replaceState(null, '', TAB_PATHS.dashboard);
+    setAdminPassword('');
+    setNewAdminPassword('');
+    setAdminError('');
+    setChangingAdminPassword(false);
+    setShowAdminPrompt(true);
+  }, [activeTab, adminAuditAuthorized, currentUser?.role, isAuthenticated]);
+
+  useEffect(() => {
+    if (!isAuthenticated) setAdminAuditAuthorized(false);
+  }, [isAuthenticated]);
+
   useEffect(() => {
     if (!isAuthenticated || currentUser?.role === 'admin') return undefined;
     const timeout = setInterval(() => {
       const lastCallActivity = Number(localStorage.getItem('lastCallActivity') || Date.now());
       if (Date.now() - lastCallActivity >= 45 * 60 * 1000) {
-        axios.post('/api/auth/lock-inactive-user', { userId: currentUser?.id }).catch(() => null);
+        api.post('/api/auth/lock-inactive-user', { userId: currentUser?.id }).catch(() => null);
         dispatch(logout());
       }
     }, 60 * 1000);
@@ -38,14 +82,14 @@ function AppContent() {
 
   useEffect(() => {
     if (!isAuthenticated || !currentUser?.id) return undefined;
-    const updatePresence = () => axios.post('/api/auth/presence', { userId: currentUser.id }).catch(() => null);
+    const updatePresence = () => api.post('/api/auth/presence', { userId: currentUser.id }).catch(() => null);
     updatePresence();
     const heartbeat = setInterval(updatePresence, 60 * 1000);
     return () => clearInterval(heartbeat);
   }, [isAuthenticated, currentUser?.id]);
 
   const requestAdminAccess = () => {
-    if (currentUser?.role === 'admin') {
+    if (currentUser?.role === 'admin' || adminAuditAuthorized) {
       setActiveTab('admin');
       return;
     }
@@ -61,7 +105,8 @@ function AppContent() {
     setCheckingAdmin(true);
     setAdminError('');
     try {
-      await axios.post('/api/auth/verify-admin-audit', { password: adminPassword });
+      await api.post('/api/auth/verify-admin-audit', { password: adminPassword });
+      setAdminAuditAuthorized(true);
       setActiveTab('admin');
       setShowAdminPrompt(false);
     } catch (error) {
@@ -76,7 +121,7 @@ function AppContent() {
     setCheckingAdmin(true);
     setAdminError('');
     try {
-      await axios.post('/api/auth/change-admin-audit-password', { currentPassword: adminPassword, newPassword: newAdminPassword });
+      await api.post('/api/auth/change-admin-audit-password', { currentPassword: adminPassword, newPassword: newAdminPassword });
       setActiveTab('admin');
       setShowAdminPrompt(false);
     } catch (error) {

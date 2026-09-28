@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import { api } from '../services/api';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
   Phone, 
@@ -63,8 +63,8 @@ export default function Dashboard({ adminMode = false, userManagement = false })
     if (adminMode || userManagement) {
       setUserManagementLoading(true);
       Promise.all([
-        axios.get('/api/auth/admin-requests'),
-        axios.get('/api/auth/users')
+        api.get('/api/auth/admin-requests'),
+        api.get('/api/auth/users')
       ]).then(([requestsResponse, usersResponse]) => {
         setAdminRequests(requestsResponse.data);
         setSystemUsers(usersResponse.data);
@@ -77,7 +77,7 @@ export default function Dashboard({ adminMode = false, userManagement = false })
 
   const refreshUserManagement = () => {
     setUserManagementLoading(true);
-    Promise.all([axios.get('/api/auth/admin-requests'), axios.get('/api/auth/users')])
+    Promise.all([api.get('/api/auth/admin-requests'), api.get('/api/auth/users')])
       .then(([requestsResponse, usersResponse]) => {
         setAdminRequests(requestsResponse.data);
         setSystemUsers(usersResponse.data);
@@ -88,17 +88,17 @@ export default function Dashboard({ adminMode = false, userManagement = false })
   };
 
   const resolveAdminRequest = async (id, action) => {
-    await axios.put(`/api/auth/admin-requests/${id}`, { action });
+    await api.put(`/api/auth/admin-requests/${id}`, { action });
     refreshUserManagement();
   };
 
   const unlockUser = async (id) => {
-    await axios.put(`/api/auth/users/${id}/unlock`);
+    await api.put(`/api/auth/users/${id}/unlock`);
     refreshUserManagement();
   };
 
   const lockUser = async (id) => {
-    await axios.post('/api/auth/lock-inactive-user', { userId: id });
+    await api.post('/api/auth/lock-inactive-user', { userId: id });
     refreshUserManagement();
   };
 

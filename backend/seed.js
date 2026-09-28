@@ -1,3 +1,4 @@
+require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const { randomUUID } = require('crypto');
 const { connectToMongoDB, disconnectFromMongoDB } = require('./src/DataBase/db');
@@ -17,10 +18,18 @@ async function main() {
   const database = await connectToMongoDB();
   const users = database.collection('users');
   const now = new Date();
-  const accounts = [
-    { username: 'admin', password: 'Admin@2026!', role: 'admin' },
-    { username: 'user1', password: 'User@2026!', role: 'user' }
-  ];
+  const accounts = [];
+  const initialAdminUsername = process.env.INITIAL_ADMIN_USERNAME;
+  const initialAdminPassword = process.env.INITIAL_ADMIN_PASSWORD;
+
+  if (initialAdminUsername || initialAdminPassword) {
+    if (!initialAdminUsername || !initialAdminPassword) {
+      throw new Error('Set both INITIAL_ADMIN_USERNAME and INITIAL_ADMIN_PASSWORD to seed an administrator');
+    }
+    accounts.push({ username: initialAdminUsername, password: initialAdminPassword, role: 'admin' });
+  } else {
+    console.warn('No initial admin credentials configured; administrator account seeding skipped.');
+  }
 
   for (const account of accounts) {
     await users.updateOne(

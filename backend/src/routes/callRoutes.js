@@ -4,6 +4,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const callController = require('../controllers/callController');
+const { authenticateToken } = require('../middleware/authMiddleware');
 
 // Ensure uploads folder exists
 const uploadDir = path.join(__dirname, '../../uploads');
@@ -23,6 +24,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+router.use(authenticateToken);
 router.get('/', callController.getCallLogs);
 router.get('/reports', callController.getCallReports);
 router.get('/:id', callController.getCallLogById);

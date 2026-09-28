@@ -1,12 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { api } from '../services/api';
 import { getErrorMessage } from '../utils/errorMessage';
 
 const API_URL = '/api/calls';
 
 export const fetchCallLogs = createAsyncThunk('calls/fetchCallLogs', async (_, { rejectWithValue }) => {
   try {
-    const response = await axios.get(API_URL);
+    const response = await api.get(API_URL);
     return response.data;
   } catch (error) {
     return rejectWithValue(getErrorMessage(error, 'Failed to fetch call logs'));
@@ -15,7 +15,7 @@ export const fetchCallLogs = createAsyncThunk('calls/fetchCallLogs', async (_, {
 
 export const fetchCallReports = createAsyncThunk('calls/fetchCallReports', async (_, { rejectWithValue }) => {
   try {
-    const response = await axios.get(`${API_URL}/reports`);
+    const response = await api.get(`${API_URL}/reports`);
     return response.data;
   } catch (error) {
     return rejectWithValue(getErrorMessage(error, 'Failed to fetch call reports'));
@@ -24,7 +24,7 @@ export const fetchCallReports = createAsyncThunk('calls/fetchCallReports', async
 
 export const saveCallLog = createAsyncThunk('calls/saveCallLog', async (callData, { rejectWithValue }) => {
   try {
-    const response = await axios.post(API_URL, callData);
+    const response = await api.post(API_URL, callData);
     return response.data;
   } catch (error) {
     return rejectWithValue(getErrorMessage(error, 'Failed to save call log'));
@@ -33,7 +33,7 @@ export const saveCallLog = createAsyncThunk('calls/saveCallLog', async (callData
 
 export const updateCallLogNotes = createAsyncThunk('calls/updateCallLogNotes', async ({ id, notes }, { rejectWithValue }) => {
   try {
-    const response = await axios.put(`${API_URL}/${id}/notes`, { notes });
+    const response = await api.put(`${API_URL}/${id}/notes`, { notes });
     return response.data;
   } catch (error) {
     return rejectWithValue(getErrorMessage(error, 'Failed to update call notes'));
@@ -42,7 +42,7 @@ export const updateCallLogNotes = createAsyncThunk('calls/updateCallLogNotes', a
 
 export const deleteCallLog = createAsyncThunk('calls/deleteCallLog', async (id, { rejectWithValue }) => {
   try {
-    await axios.delete(`${API_URL}/${id}`);
+    await api.delete(`${API_URL}/${id}`);
     return id;
   } catch (error) {
     return rejectWithValue(getErrorMessage(error, 'Failed to delete call log'));

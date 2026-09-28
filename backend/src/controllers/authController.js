@@ -3,8 +3,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { randomUUID, timingSafeEqual } = require('crypto');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_crm_key_123';
-const ADMIN_AUDIT_PASSWORD = process.env.ADMIN_AUDIT_PASSWORD || 'Admin@2026!';
+const JWT_SECRET = process.env.JWT_SECRET;
+const ADMIN_AUDIT_PASSWORD = process.env.ADMIN_AUDIT_PASSWORD;
 
 async function matchesAdminAuditPassword(password) {
   const database = await connectToMongoDB();
@@ -152,41 +152,9 @@ exports.login = async (req, res) => {
   }
 
   try {
-    const demoAccounts = {
-      'admin@digitaltatsat.com': {
-        password: 'digitaltatsat@12345',
-        role: 'admin'
-      }
-    };
-
-    const demo = demoAccounts[username];
     const database = await connectToMongoDB();
     const users = database.collection('users');
-    let user = await users.findOne({ username });
-
-    if (demo && password === demo.password) {
-      const hashedPassword = await bcrypt.hash(demo.password, 10);
-
-      await users.updateOne(
-        { username },
-        {
-          $set: {
-            password: hashedPassword,
-            role: 'admin',
-            requestedRole: 'admin',
-            approvalStatus: 'APPROVED',
-            accountStatus: 'ACTIVE',
-            lockedAt: null
-          },
-          $setOnInsert: {
-            _id: randomUUID(),
-            createdAt: new Date()
-          }
-        },
-        { upsert: true }
-      );
-      user = await users.findOne({ username });
-    }
+    const user = await users.findOne({ username });
 
     if (!user || user.role === 'audit-secret') {
       return res.status(401).json({ error: 'Invalid username or password' });
@@ -240,7 +208,7 @@ exports.updatePresence = async (req, res) => {
   try {
     const database = await connectToMongoDB();
     const result = await database.collection('users').updateOne(
-      { _id: req.body.userId },
+      { _id: req.user.id },
       { $set: { lastSeenAt: new Date() } }
     );
     if (!result.matchedCount) {
@@ -255,9 +223,12 @@ exports.updatePresence = async (req, res) => {
 
 exports.lockInactiveUser = async (req, res) => {
   try {
+    const userId = req.user.role === 'admin' && req.body.userId
+      ? req.body.userId
+      : req.user.id;
     const database = await connectToMongoDB();
     const result = await database.collection('users').updateOne(
-      { _id: req.body.userId },
+      { _id: userId },
       {
         $set: {
           accountStatus: 'LOCKED',

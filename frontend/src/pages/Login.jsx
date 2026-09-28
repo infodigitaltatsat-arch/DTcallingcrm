@@ -128,12 +128,9 @@ export default function Login() {
             </div>
           </form>
           {isLoginMode && (
-            <div className="mt-5 rounded-xl border border-royal-800/50 bg-royal-950/30 p-3 text-xs text-slate-300 relative z-10">
-              <p className="font-bold text-royal-300">Demo login IDs</p>
-              <p className="mt-1">Admin: <span className="font-mono text-white">admin</span> / <span className="font-mono text-white">Admin@2026!</span></p>
-              <p className="mt-1">User: <span className="font-mono text-white">user1</span> / <span className="font-mono text-white">User@2026!</span></p>
-              <p className="mt-2 text-slate-500">Users are automatically signed out after 45 minutes without a completed call.</p>
-            </div>
+            <p className="mt-5 text-center text-xs text-slate-500 relative z-10">
+              Users are automatically signed out after 45 minutes without a completed call.
+            </p>
           )}
           
           <div className="mt-6 text-center text-sm text-slate-400 relative z-10">

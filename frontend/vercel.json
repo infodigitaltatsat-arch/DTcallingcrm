@@ -1,0 +1,7 @@
+{
+  "routes": [
+    { "src": "^/api(/.*)?$", "status": 404 },
+    { "src": "^/uploads(/.*)?$", "status": 404 },
+    { "src": "^/(.*)$", "dest": "/index.html" }
+  ]
+}

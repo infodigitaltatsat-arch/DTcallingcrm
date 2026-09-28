@@ -75,8 +75,6 @@ echo.
 :: ============================================================
 echo [STEP 3/5] Setting up Backend (Express + MongoDB)...
 cd /d "%~dp0backend"
-:: Change this value before deployment to set the private Admin Audit password.
-set "ADMIN_AUDIT_PASSWORD=Admin@2026!"
 if not exist "%cd%\package.json" (
     color 0C
     echo [ERROR] Failed to enter the backend folder. Aborting to avoid

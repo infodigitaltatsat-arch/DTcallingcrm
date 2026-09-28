@@ -1,12 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { api } from '../services/api';
 import { getErrorMessage } from '../utils/errorMessage';
 
 const API_URL = '/api/contacts';
 
 export const fetchContacts = createAsyncThunk('contacts/fetchContacts', async (_, { rejectWithValue }) => {
   try {
-    const response = await axios.get(API_URL);
+    const response = await api.get(API_URL);
     return response.data;
   } catch (error) {
     return rejectWithValue(getErrorMessage(error, 'Failed to fetch contacts'));
@@ -15,7 +15,7 @@ export const fetchContacts = createAsyncThunk('contacts/fetchContacts', async (_
 
 export const addContact = createAsyncThunk('contacts/addContact', async (contactData, { rejectWithValue }) => {
   try {
-    const response = await axios.post(API_URL, contactData);
+    const response = await api.post(API_URL, contactData);
     return response.data;
   } catch (error) {
     return rejectWithValue(getErrorMessage(error, 'Failed to add contact'));
@@ -24,7 +24,7 @@ export const addContact = createAsyncThunk('contacts/addContact', async (contact
 
 export const bulkImportContacts = createAsyncThunk('contacts/bulkImport', async (contacts, { rejectWithValue }) => {
   try {
-    const response = await axios.post(`${API_URL}/bulk`, { contacts });
+    const response = await api.post(`${API_URL}/bulk`, { contacts });
     return response.data;
   } catch (error) {
     return rejectWithValue(getErrorMessage(error, 'Failed to import contacts'));
@@ -33,7 +33,7 @@ export const bulkImportContacts = createAsyncThunk('contacts/bulkImport', async 
 
 export const updateContact = createAsyncThunk('contacts/updateContact', async ({ id, contactData }, { rejectWithValue }) => {
   try {
-    const response = await axios.put(`${API_URL}/${id}`, contactData);
+    const response = await api.put(`${API_URL}/${id}`, contactData);
     return response.data;
   } catch (error) {
     return rejectWithValue(getErrorMessage(error, 'Failed to update contact'));
@@ -42,7 +42,7 @@ export const updateContact = createAsyncThunk('contacts/updateContact', async ({
 
 export const deleteContact = createAsyncThunk('contacts/deleteContact', async (id, { rejectWithValue }) => {
   try {
-    await axios.delete(`${API_URL}/${id}`);
+    await api.delete(`${API_URL}/${id}`);
     return id;
   } catch (error) {
     return rejectWithValue(getErrorMessage(error, 'Failed to delete contact'));

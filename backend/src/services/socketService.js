@@ -1,13 +1,34 @@
 const { Server } = require('socket.io');
+const jwt = require('jsonwebtoken');
 const { getCollection, toApiDocument } = require('../DataBase/db');
 
 let io = null;
 
 function initSocket(server) {
+  const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
   io = new Server(server, {
     cors: {
-      origin: process.env.FRONTEND_URL || "http://localhost:5173",
-      methods: ["GET", "POST"]
+      origin: allowedOrigins,
+      methods: ['GET', 'POST'],
+      credentials: true
+    }
+  });
+
+  io.use((socket, next) => {
+    const token = socket.handshake.auth?.token;
+    if (!token || !process.env.JWT_SECRET) {
+      return next(new Error('Authentication required'));
+    }
+
+    try {
+      socket.data.user = jwt.verify(token, process.env.JWT_SECRET);
+      return next();
+    } catch {
+      return next(new Error('Invalid authentication token'));
     }
   });
 
