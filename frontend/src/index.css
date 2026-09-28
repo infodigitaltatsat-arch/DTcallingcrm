@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-dark-950 text-slate-100 font-sans;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-dark-900;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-700 rounded-full hover:bg-slate-600 transition-colors;
+}
+
+/* Glassmorphism Card Style */
+.glass-panel {
+  background: rgba(11, 15, 25, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glass-panel-accent {
+  background: linear-gradient(135deg, rgba(1, 16, 58, 0.8) 0%, rgba(11, 15, 25, 0.7) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+}
+
+/* Pulse Glow Key Animation */
+@keyframes dial-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px 5px rgba(59, 130, 246, 0.2);
+  }
+}
+
+.active-call-pulse {
+  animation: dial-pulse 2s infinite ease-in-out;
+}
+
+/* Keypad Grid Hover Transition */
+.keypad-btn {
+  @apply flex flex-col items-center justify-center w-14 h-14 rounded-full bg-dark-800 text-white hover:bg-royal-900 border border-slate-800 hover:border-royal-500 hover:shadow-glow-royal transition-all duration-200 cursor-pointer active:scale-95;
+}
