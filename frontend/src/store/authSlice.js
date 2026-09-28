@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import { getErrorMessage } from '../utils/errorMessage';
 
 // The proxy should automatically redirect this to the backend
 const API_URL = '/api/auth';
@@ -9,7 +10,7 @@ export const login = createAsyncThunk('auth/login', async (credentials, { reject
     const response = await axios.post(`${API_URL}/login`, credentials);
     return response.data;
   } catch (error) {
-    return rejectWithValue(error.response?.data?.error || 'Login failed');
+    return rejectWithValue(getErrorMessage(error, 'Login failed'));
   }
 });
 
@@ -19,7 +20,7 @@ export const signup = createAsyncThunk('auth/signup', async (credentials, { reje
     if (response.data.pendingApproval) return rejectWithValue(response.data.message);
     return response.data;
   } catch (error) {
-    return rejectWithValue(error.response?.data?.error || 'Signup failed');
+    return rejectWithValue(getErrorMessage(error, 'Signup failed'));
   }
 });
 

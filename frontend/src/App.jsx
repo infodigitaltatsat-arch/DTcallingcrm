@@ -10,6 +10,7 @@ import Contacts from './pages/Contacts';
 import Login from './pages/Login';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from './store/authSlice';
+import { getErrorMessage } from './utils/errorMessage';
 
 function AppContent() {
   const dispatch = useDispatch();
@@ -64,7 +65,7 @@ function AppContent() {
       setActiveTab('admin');
       setShowAdminPrompt(false);
     } catch (error) {
-      setAdminError(error.response?.data?.error || 'Unable to verify Admin Audit access');
+      setAdminError(getErrorMessage(error, 'Unable to verify Admin Audit access'));
     } finally {
       setCheckingAdmin(false);
     }
@@ -79,7 +80,7 @@ function AppContent() {
       setActiveTab('admin');
       setShowAdminPrompt(false);
     } catch (error) {
-      setAdminError(error.response?.data?.error || 'Unable to change Admin Audit password');
+      setAdminError(getErrorMessage(error, 'Unable to change Admin Audit password'));
     } finally {
       setCheckingAdmin(false);
     }

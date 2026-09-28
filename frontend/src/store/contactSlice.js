@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import { getErrorMessage } from '../utils/errorMessage';
 
 const API_URL = '/api/contacts';
 
@@ -8,7 +9,7 @@ export const fetchContacts = createAsyncThunk('contacts/fetchContacts', async (_
     const response = await axios.get(API_URL);
     return response.data;
   } catch (error) {
-    return rejectWithValue(error.response?.data?.error || 'Failed to fetch contacts');
+    return rejectWithValue(getErrorMessage(error, 'Failed to fetch contacts'));
   }
 });
 
@@ -17,7 +18,7 @@ export const addContact = createAsyncThunk('contacts/addContact', async (contact
     const response = await axios.post(API_URL, contactData);
     return response.data;
   } catch (error) {
-    return rejectWithValue(error.response?.data?.error || 'Failed to add contact');
+    return rejectWithValue(getErrorMessage(error, 'Failed to add contact'));
   }
 });
 
@@ -26,7 +27,7 @@ export const bulkImportContacts = createAsyncThunk('contacts/bulkImport', async 
     const response = await axios.post(`${API_URL}/bulk`, { contacts });
     return response.data;
   } catch (error) {
-    return rejectWithValue(error.response?.data?.error || 'Failed to import contacts');
+    return rejectWithValue(getErrorMessage(error, 'Failed to import contacts'));
   }
 });
 
@@ -35,7 +36,7 @@ export const updateContact = createAsyncThunk('contacts/updateContact', async ({
     const response = await axios.put(`${API_URL}/${id}`, contactData);
     return response.data;
   } catch (error) {
-    return rejectWithValue(error.response?.data?.error || 'Failed to update contact');
+    return rejectWithValue(getErrorMessage(error, 'Failed to update contact'));
   }
 });
 
@@ -44,7 +45,7 @@ export const deleteContact = createAsyncThunk('contacts/deleteContact', async (i
     await axios.delete(`${API_URL}/${id}`);
     return id;
   } catch (error) {
-    return rejectWithValue(error.response?.data?.error || 'Failed to delete contact');
+    return rejectWithValue(getErrorMessage(error, 'Failed to delete contact'));
   }
 });
 

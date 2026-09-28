@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import { getErrorMessage } from '../utils/errorMessage';
 
 const API_URL = '/api/calls';
 
@@ -8,7 +9,7 @@ export const fetchCallLogs = createAsyncThunk('calls/fetchCallLogs', async (_, {
     const response = await axios.get(API_URL);
     return response.data;
   } catch (error) {
-    return rejectWithValue(error.response?.data?.error || 'Failed to fetch call logs');
+    return rejectWithValue(getErrorMessage(error, 'Failed to fetch call logs'));
   }
 });
 
@@ -17,7 +18,7 @@ export const fetchCallReports = createAsyncThunk('calls/fetchCallReports', async
     const response = await axios.get(`${API_URL}/reports`);
     return response.data;
   } catch (error) {
-    return rejectWithValue(error.response?.data?.error || 'Failed to fetch call reports');
+    return rejectWithValue(getErrorMessage(error, 'Failed to fetch call reports'));
   }
 });
 
@@ -26,7 +27,7 @@ export const saveCallLog = createAsyncThunk('calls/saveCallLog', async (callData
     const response = await axios.post(API_URL, callData);
     return response.data;
   } catch (error) {
-    return rejectWithValue(error.response?.data?.error || 'Failed to save call log');
+    return rejectWithValue(getErrorMessage(error, 'Failed to save call log'));
   }
 });
 
@@ -35,7 +36,7 @@ export const updateCallLogNotes = createAsyncThunk('calls/updateCallLogNotes', a
     const response = await axios.put(`${API_URL}/${id}/notes`, { notes });
     return response.data;
   } catch (error) {
-    return rejectWithValue(error.response?.data?.error || 'Failed to update call notes');
+    return rejectWithValue(getErrorMessage(error, 'Failed to update call notes'));
   }
 });
 
@@ -44,7 +45,7 @@ export const deleteCallLog = createAsyncThunk('calls/deleteCallLog', async (id, 
     await axios.delete(`${API_URL}/${id}`);
     return id;
   } catch (error) {
-    return rejectWithValue(error.response?.data?.error || 'Failed to delete call log');
+    return rejectWithValue(getErrorMessage(error, 'Failed to delete call log'));
   }
 });
 

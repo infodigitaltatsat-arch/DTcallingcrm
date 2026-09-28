@@ -18,6 +18,7 @@ import { fetchContacts, addContact, deleteContact, bulkImportContacts } from '..
 import { startOutboundCall } from '../store/callSlice';
 import { addReminder } from '../store/reminderSlice';
 import { socketInstance } from '../components/Layout';
+import { getErrorMessage } from '../utils/errorMessage';
 
 export default function Contacts() {
   const dispatch = useDispatch();
@@ -74,7 +75,7 @@ export default function Contacts() {
       setShowAddContactModal(false);
       setNewContact({ name: '', phone: '', email: '', company: '', status: 'Lead' });
     } catch (err) {
-      setAddContactError(err || 'Failed to add contact.');
+      setAddContactError(getErrorMessage(err, 'Failed to add contact.'));
     }
   };
 
@@ -170,7 +171,7 @@ export default function Contacts() {
       setShowReminderModal(false);
       setSelectedContact(null);
     } catch (err) {
-      setReminderError(err || 'Failed to schedule reminder.');
+      setReminderError(getErrorMessage(err, 'Failed to schedule reminder.'));
     }
   };
 
